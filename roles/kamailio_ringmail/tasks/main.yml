@@ -1,0 +1,25 @@
+---
+- name: install rpms
+  yum: name={{ item }} state=present
+  with_items:
+   - kamailio
+   - kamailio-auth-ephemeral
+   - kamailio-carrierroute
+   - kamailio-cpl
+   - kamailio-debuginfo
+   - kamailio-gzcompress
+   - kamailio-ldap
+   - kamailio-mysql
+   - kamailio-outbound
+   - kamailio-postgres
+   - kamailio-presence
+   - kamailio-sqlite
+   - kamailio-snmpstats
+   - kamailio-tls
+   - kamailio-unixodbc
+   - kamailio-utils
+   - kamailio-uuid
+   - kamailio-websocket
+   - kamailio-xml
+   - kamailio-xmpp
+

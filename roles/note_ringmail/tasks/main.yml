@@ -1,0 +1,35 @@
+---
+- name: setup note user
+  user: name=note comment="Note" state="present" generate_ssh_key="yes"
+
+- name: note dotfiles
+  copy: src={{ item }} dest=/home/note/{{ item }} mode=0644 owner=note group=note
+  with_items:
+    - .vimrc
+    - .bashrc
+
+- name: create directories
+  file: path={{ item }} state=directory mode=0755 owner=note group=note
+  with_items:
+    - /home/note/app
+    - /home/note/lib
+    - /home/note/cfg
+    - /home/note/cfg/app
+
+- name: Git repos
+  git: repo={{ item.repo }} dest={{ item.path }} accept_hostkey=true
+  sudo: yes
+  sudo_user: note
+  with_items:
+    - { repo: 'git@nova1.revalead.com:dyl/note.git', path: /home/note/lib/Note }
+    - { repo: 'git@nova1.revalead.com:dyl/dev-console.git', path: /home/note/app/dev }
+    - { repo: 'git@nova1.revalead.com:dyl/ringmail-backend.git', path: /home/note/app/ringmail }
+
+- name: create dev work directories
+  file: path={{ item }} state=directory mode=0755 owner=note group=note
+  with_items:
+    - /home/note/app/dev/work
+    - /home/note/app/dev/work/session
+    - /home/note/app/dev/work/page
+    - /home/note/app/dev/work/sql
+

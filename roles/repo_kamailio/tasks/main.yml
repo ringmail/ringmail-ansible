@@ -1,0 +1,3 @@
+---
+- copy: src=kamailio.repo dest=/etc/yum.repos.d/kamailio.repo owner=root group=root mode=0644 force=yes
+

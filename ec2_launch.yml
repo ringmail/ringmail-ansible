@@ -1,0 +1,50 @@
+---
+- name: Spin up some EC2 instances
+  hosts: 127.0.0.1
+  connection: local
+  tasks:
+#    - name: Create security group
+#      local_action:
+#        module: ec2_group
+#        aws_access_key: "{{ aws_access }}"
+#        aws_secret_key: "{{ aws_secret }}"
+#        name: dyl_dev_secgrp_2
+#        description: webservers
+#        region: us-west-1
+#        rules:
+#          - proto: tcp
+#            from_port: 22
+#            to_port: 22
+#            cidr_ip: 38.79.68.242/32
+#          - proto: tcp
+#            from_port: 80
+#            to_port: 80
+#            cidr_ip: 0.0.0.0/0
+#        rules_egress:
+#          - proto: udp
+#            from_port: 0
+#            to_port: 65535
+#            cidr_ip: 0.0.0.0/0
+#          - proto: tcp
+#            from_port: 0
+#            to_port: 65535
+#            cidr_ip: 0.0.0.0/0
+
+    - name: Launch instances
+      local_action:
+        aws_access_key: "{{ aws_access }}"
+        aws_secret_key: "{{ aws_secret }}"
+        module: ec2
+        region: "us-west-1"
+        zone: "us-west-1a"
+        keypair: dyl-keys-2
+        group: dyl_dev_secgrp_1
+        instance_type: m4.large
+        image: ami-6bcfc42e # CentOS 7
+        count: 1
+        wait: yes
+        volumes:
+         - device_name: /dev/sda1
+           device_type: gp2
+           volume_size: 50
+           delete_on_termination: true

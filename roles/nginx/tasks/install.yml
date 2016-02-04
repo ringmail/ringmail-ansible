@@ -1,0 +1,22 @@
+---
+- set_fact: nginx_repo_rpm="nginx-release-centos-7-0.el7.ngx.noarch.rpm"
+
+- name: check for nginx RPM repo
+  stat: path=/etc/yum.repos.d/nginx.repo
+  register: nginx_repo_file
+
+- name: copy repo RPM
+  copy: src={{ nginx_repo_rpm }} dest=/tmp/{{ nginx_repo_rpm }}
+  when: nginx_repo_file.stat.exists == false
+
+- name: install repo RPM
+  yum: name=/tmp/{{ nginx_repo_rpm }} state=present
+  when: nginx_repo_file.stat.exists == false
+
+- name: remove rpm file
+  file: path=/tmp/{{ nginx_repo_rpm }} state=absent
+  when: nginx_repo_file.stat.exists == false
+
+- name: install nginx
+  yum: name=nginx state=present
+

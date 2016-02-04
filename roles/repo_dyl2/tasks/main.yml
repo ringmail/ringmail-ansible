@@ -1,0 +1,2 @@
+---
+- copy: src=dyl2_repo.repo dest=/etc/yum.repos.d/dyl2_repo.repo owner=root group=root mode=0644 force=yes

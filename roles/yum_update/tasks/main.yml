@@ -1,0 +1,5 @@
+---
+- name: yum update
+  yum: name=* state=latest
+  when: yum_skip_update is not defined or (yum_skip_update is defined and not yum_skip_update)
+

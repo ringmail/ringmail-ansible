@@ -1,0 +1,16 @@
+---
+- name: Install ntp packages
+  yum: name={{ item }} state=installed
+  with_items:
+    - ntp
+    - ntpdate
+
+- name: Turn off ntpd
+  service: name=ntpd state=stopped
+
+- name: Update time
+  command: ntpdate 0.north-america.pool.ntp.org
+
+- name: Turn on ntpd
+  service: name=ntpd state=started enabled=yes
+

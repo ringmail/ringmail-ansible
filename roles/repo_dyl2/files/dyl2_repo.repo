@@ -1,0 +1,6 @@
+[dyl2_repo]
+name=DYL2 RPM Repo
+baseurl=http://repo1-mf.getdyl.com/repo
+enabled=1
+gpgcheck=0
+

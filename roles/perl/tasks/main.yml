@@ -1,0 +1,45 @@
+---
+- name: install perl rpms
+  yum: name={{ item }} state=present
+  with_items:
+   - perl-core
+   - perl-DBI
+   - perl-DBD-MySQL
+   - perl-DBD-Pg
+   - perl-DBD-Pg-tests
+   - perl-Digest-MD5
+   - perl-IO-Socket-SSL
+   - perl-Archive-Zip
+   - perl-libwww-perl
+   - perl-Plack
+   - perl-FCGI-ProcManager
+   - perl-Moose
+   - perl-Devel-StackTrace-2.00-1.el7.centos
+   - perl-Config-General
+   - perl-DBIx-Connector
+   - perl-RDF-Trine
+   - perl-RDF-Query
+   - perl-IRI
+   - perl-Carp-Always
+   - perl-Module-Refresh
+   - perl-SQL-Translator
+   - perl-Iterator
+   - perl-Iterator-IO
+   - perl-Iterator-Util
+   - perl-Clone
+   - perl-String-Random
+   - perl-File-Copy-Recursive
+   - perl-Pod-Autopod
+   - perl-Pod-Tree
+   - perl-IO-All
+   - perl-Text-CSV_XS
+   - perl-RDF-Query-Client
+   - perl-Email-Valid
+   - perl-Math-Random-Secure
+   - perl-Authen-Passphrase
+   - perl-Authen-Passphrase-SaltedSHA512
+   - perl-MIME-Lite
+   - perl-Data-Validate-Domain
+   - perl-Number-Format
+   - perl-Regexp-Common
+

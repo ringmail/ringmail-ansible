@@ -1,0 +1,4 @@
+staging*
+production
+group_vars/*
+host_vars/*

@@ -1,0 +1,16 @@
+- name: WWW Hosts
+  hosts: www_hosts
+  user: centos
+  sudo: yes
+  gather_facts: yes
+  roles:
+    - role: yum_update
+    #- role: ntp
+    - role: utils
+    - role: nginx
+    - role: repo_dyl2
+    - role: repo_kamailio
+    - role: perl
+    - role: note_ringmail
+    - role: kamailio_ringmail
+

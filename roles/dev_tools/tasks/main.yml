@@ -1,0 +1,4 @@
+---
+- name: install centos dev tools package group
+  yum: name="@Development Tools" state=present
+
