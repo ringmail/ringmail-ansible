@@ -23,3 +23,5 @@
    - kamailio-xml
    - kamailio-xmpp
 
+- template: src=kamailio.cfg.j2 dest=/etc/kamailio/kamailio.cfg
+

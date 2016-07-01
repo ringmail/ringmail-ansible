@@ -1,0 +1,3 @@
+---
+- name: install rpms
+  yum: name=ejabberd-16.04-10.el7 state=present
