@@ -1,5 +1,6 @@
 ---
 - set_fact: epel_repo_rpm="epel-release-latest-7.noarch.rpm"
+- set_fact: epel_repo_rpm_key="RPM-GPG-KEY-EPEL-7"
 
 - name: check for epel RPM repo
   stat: path=/etc/yum.repos.d/epel.repo
@@ -18,5 +19,7 @@
   when: epel_repo_file.stat.exists == false
 
 - name: Import EPEL GPG key.
-  rpm_key: state=present key=RPM-GPG-KEY-EPEL-7
+  rpm_key:
+    key: "{{ epel_repo_rpm_key }}"
+    state: present
 
