@@ -42,4 +42,5 @@
    - perl-Data-Validate-Domain
    - perl-Number-Format
    - perl-Regexp-Common
+   - perl-constant-boolean
 
