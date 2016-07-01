@@ -9,8 +9,10 @@
     - role: utils
     - role: nginx
     - role: repo_dyl2
+    - role: repo_epel
     - role: repo_kamailio
     - role: perl
     - role: note_ringmail
     - role: kamailio_ringmail
+    - role: ejabberd_ringmail
 
