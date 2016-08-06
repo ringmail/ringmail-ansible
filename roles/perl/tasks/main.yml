@@ -43,4 +43,8 @@
    - perl-Number-Format
    - perl-Regexp-Common
    - perl-constant-boolean
+   - perl-Readonly
+   - perl-Readonly-XS
+   - perl-Image-Scale
+   - perl-Crypt-CBC
 

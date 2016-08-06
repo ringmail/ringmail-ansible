@@ -33,3 +33,6 @@
     - /home/note/app/dev/work/page
     - /home/note/app/dev/work/sql
 
+- name: cron to expire carts
+  cron: name="expire_cart" user="note" month="*" day="*" weekday="*" hour="*" minute="*/5" state=present job="/home/note/app/ringmail/scripts/cron_expire_cart.pl"
+

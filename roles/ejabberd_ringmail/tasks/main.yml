@@ -1,6 +1,6 @@
 ---
 - name: install rpms
-  yum: name=ejabberd-16.04-10.el7 state=present
+  yum: name=ejabberd-16.04-10.el7.centos state=present
 
 - name: template ejabberd.yml
   template: src=ejabberd.yml.j2 dest=/etc/ejabberd/ejabberd.yml
@@ -10,4 +10,6 @@
   with_items:
     - mod_offline_post.beam
     - mod_ringmail.beam
+
+- file: src=/usr/sbin/ejabberdctl dest=/usr/bin/ejabberdctl state=link
 

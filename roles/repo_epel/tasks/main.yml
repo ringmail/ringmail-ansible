@@ -2,24 +2,27 @@
 - set_fact: epel_repo_rpm="epel-release-latest-7.noarch.rpm"
 - set_fact: epel_repo_rpm_key="RPM-GPG-KEY-EPEL-7"
 
+- name: copy key file
+  copy: src="{{ epel_repo_rpm_key }}" dest="/root/{{ epel_repo_rpm_key }}"
+
 - name: check for epel RPM repo
   stat: path=/etc/yum.repos.d/epel.repo
   register: epel_repo_file
 
 - name: copy repo RPM
-  copy: src={{ epel_repo_rpm }} dest=/tmp/{{ epel_repo_rpm }}
+  copy: src="{{ epel_repo_rpm }}" dest="/tmp/{{ epel_repo_rpm }}"
   when: epel_repo_file.stat.exists == false
 
 - name: install repo RPM
-  yum: name=/tmp/{{ epel_repo_rpm }} state=present
+  yum: name="/tmp/{{ epel_repo_rpm }}" state=present
   when: epel_repo_file.stat.exists == false
 
 - name: remove rpm file
-  file: path=/tmp/{{ epel_repo_rpm }} state=absent
+  file: path="/tmp/{{ epel_repo_rpm }}" state=absent
   when: epel_repo_file.stat.exists == false
 
 - name: Import EPEL GPG key.
   rpm_key:
-    key: "{{ epel_repo_rpm_key }}"
+    key: "/root/{{ epel_repo_rpm_key }}"
     state: present
 
