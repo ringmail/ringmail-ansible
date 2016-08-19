@@ -38,6 +38,7 @@
 #
 # *** To enable nat traversal execute:
 #!define WITH_NAT
+#!define WITH_RTPPROXY
 #     - define WITH_RTPPROXY
 #     - install RTPProxy: http://www.rtpproxy.org
 #     - start RTPProxy:
@@ -126,6 +127,8 @@ import_file "kamailio-local.cfg"
 
 #!define FLB_NATB 6
 #!define FLB_NATSIPPING 7
+
+#!define FLB_IPV6 8
 
 ####### Global Parameters #########
 
@@ -403,7 +406,8 @@ modparam("presence_xml", "force_active", 1)
 #!ifdef WITH_NAT
 # ----- rtpproxy params -----
 #!ifdef WITH_RTPPROXY
-modparam("rtpproxy", "rtpproxy_sock", "udp:127.0.0.1:7722")
+modparam("rtpproxy", "rtpproxy_sock", "udp:127.0.0.1:9000")
+modparam("rtpproxy", "ice_candidate_priority_avp", "$avp(ice_priority)")
 #!endif
 
 # ----- nathelper params -----
@@ -589,10 +593,11 @@ route[SUSPEND] {
 
 # Send push notification
 route[SEND_PUSH] {
-	xlog("L_INFO", "[R-SEND_PUSH:$ci] Push call to:$tU from:$fU\n");
-	$var(rgto) = $(tU{s.encode.base64});
-	$var(rgfrom) = $(fU{s.encode.base64});
-	http_query("http://{{ kamailio_rg_host }}/internal/offline_call?to=$(var(rgto){s.escape.param})&from=$(var(rgfrom){s.escape.param})&call=$ci", "$var(result)");
+	xlog("L_INFO", "[R-SEND_PUSH:$ci] Push call to:$tU ($avp(ringmail_to)) from:$avp(ringmail_from) ($fU)\n");
+	$var(rgto) = $(avp(ringmail_to){s.encode.base64});
+	$var(rgfrom) = $(avp(ringmail_from){s.encode.base64});
+	$var(rgphone) = $(fU{s.encode.base64});
+	http_query("http://{{ kamailio_rg_host }}/internal/offline_call?to=$(var(rgto){s.escape.param})&from=$(var(rgfrom){s.escape.param})&phone=$(var(rgphone){s.escape.param})&call=$ci", "$var(result)");
 }
 
 # Rejoin pushed call
@@ -616,6 +621,8 @@ route[PUSH_JOIN] {
 route[RESUME]
 {
 	lookup("location");
+	xlog("L_INFO", "[R-RESUME:$ci] RTP Offer\n");
+	rtpproxy_offer();
 	t_relay();
 }
 
@@ -714,6 +721,11 @@ route[REGISTRAR] {
 		# do SIP NAT pinging
 		setbflag(FLB_NATSIPPING);
 #!endif
+	}
+	if (search_hf("Via", "\\[.*\\]", "l"))
+	{
+		setbflag(FLB_IPV6);
+		xlog("L_INFO", "[REGISTER:$ci] Via IPv6 setting flag\n");
 	}
 	if (!save("location"))
 		sl_reply_error();
@@ -869,7 +881,26 @@ route[NATMANAGE] {
 		return;
 
 #!ifdef WITH_RTPPROXY
-	rtpproxy_manage("co");
+	if(sdp_content()) {
+		#sdp_get("$avp(sdp)");
+		#xlog("L_INFO", "[R-NATMANAGE:$ci] SDP:\n$avp(sdp)\n");
+		if (search_body("^c=IN IP6"))
+		{
+			xlog("L_INFO", "[R-NATMANAGE:$ci] IPv6 SDP Detected Adding RTP Proxy\n");
+			rtpproxy_manage("co");
+		}
+		else if (isbflagset(FLB_IPV6))
+		{
+			xlog("L_INFO", "[R-NATMANAGE:$ci] IPv6 Destination: $ru");
+			rtpproxy_manage("co");
+		}
+		else
+		{
+			$avp(ice_priority) = 2;
+			xlog("L_INFO", "[R-NATMANAGE:$ci] Proxy Manage");
+			rtpproxy_manage();
+		}
+	}
 #!endif
 
 	if (is_request()) {
@@ -937,9 +968,13 @@ route[RINGMAIL] {
 				{
 					$var(to) = $(var(result){param.value,to});
 					$var(from) = $(var(result){param.value,from});
-					xlog("L_INFO", "[R-RINGMAIL:$ci] Lookup to:$var(to) from:$var(from)\n");
+					$var(uuid) = $(var(result){param.value,uuid});
+					$var(contact) = $(var(result){param.value,contact});
+					xlog("L_INFO", "[R-RINGMAIL:$ci] Lookup to:$var(to) from:$var(from) uuid:$var(uuid) contact:$var(contact)\n");
 					$ru = "sip:"+ $var(to)+ "@"+ "{{ kamailio_domain }}";
 					$fU = $var(from);
+					$avp(ringmail_to) = $var(to);
+					$avp(ringmail_from) = $var(from);
 					t_newtran();
 					t_set_fr(30000, 1000);
 					return;
