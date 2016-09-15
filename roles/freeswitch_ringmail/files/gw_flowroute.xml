@@ -1,0 +1,11 @@
+<include>
+       	<gateway name="flowroute">
+       		<param name="username" value="02978839"/>
+       		<param name="password" value="gcyymY4pkYmc"/>
+       		<param name="proxy" value="sip.flowroute.com"/>
+       		<param name="expire-seconds" value="800"/>
+       		<param name="register" value="true"/>
+       		<param name="retry-seconds" value="60"/>
+       		<param name="context" value="public"/>
+       	</gateway>
+</include>

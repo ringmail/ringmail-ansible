@@ -1,0 +1,4 @@
+---
+- copy: src=freeswitch.repo dest=/etc/yum.repos.d/freeswitch.repo owner=root group=root mode=0644 force=yes
+- copy: src=RPM-GPG-KEY-FREESWITCH dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-FREESWITCH owner=root group=root mode=0644 force=yes
+

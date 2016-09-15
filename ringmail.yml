@@ -1,18 +1,24 @@
 - name: WWW Hosts
   hosts: www_hosts
   user: centos
-  sudo: yes
+  become: yes
+  become_user: root
   gather_facts: yes
+  vars:
+    ec2_gather: 1
   roles:
-    - role: yum_update
-    #- role: ntp
+    - role: ec2_gather
+    - role: ntp
     - role: utils
     - role: nginx
     - role: repo_dyl2
     - role: repo_epel
     - role: repo_kamailio
+    - role: repo_freeswitch
     - role: perl
     - role: note_ringmail
+    - role: rtpproxy
     - role: kamailio_ringmail
     - role: ejabberd_ringmail
+    - role: freeswitch_ringmail
 

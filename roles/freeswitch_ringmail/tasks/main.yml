@@ -1,0 +1,121 @@
+---
+- name: install rpms
+  yum: name={{ item }} state=present
+  with_items:
+    - freeswitch
+    - freeswitch-application-abstraction
+    - freeswitch-application-avmd
+    - freeswitch-application-blacklist
+    - freeswitch-application-callcenter
+    - freeswitch-application-cidlookup
+    - freeswitch-application-conference
+    - freeswitch-application-curl
+    - freeswitch-application-db
+    - freeswitch-application-directory
+    - freeswitch-application-distributor
+    - freeswitch-application-easyroute
+    - freeswitch-application-enum
+    - freeswitch-application-esf
+    - freeswitch-application-expr
+    - freeswitch-application-fifo
+    - freeswitch-application-fsk
+    - freeswitch-application-fsv
+    - freeswitch-application-hash
+    - freeswitch-application-httapi
+    - freeswitch-application-http-cache
+    - freeswitch-application-lcr
+    - freeswitch-application-limit
+    - freeswitch-application-memcache
+    - freeswitch-application-nibblebill
+    - freeswitch-application-redis
+    - freeswitch-application-rss
+    - freeswitch-application-sms
+    - freeswitch-application-snapshot
+    - freeswitch-application-snom
+    - freeswitch-application-soundtouch
+    - freeswitch-application-spy
+    - freeswitch-application-stress
+    - freeswitch-application-valet_parking
+    - freeswitch-application-voicemail
+    - freeswitch-application-voicemail-ivr
+    - freeswitch-codec-bv
+    - freeswitch-codec-h26x
+    - freeswitch-codec-ilbc
+    - freeswitch-codec-opus
+    - freeswitch-codec-passthru-amr
+    - freeswitch-codec-passthru-g723_1
+    - freeswitch-codec-passthru-g729
+    - freeswitch-codec-siren
+    - freeswitch-config-vanilla
+    - freeswitch-format-local-stream
+    - freeswitch-format-native-file
+    - freeswitch-format-portaudio-stream
+    - freeswitch-format-tone-stream
+    - freeswitch-lang-de
+    - freeswitch-lang-en
+    - freeswitch-lang-es
+    - freeswitch-lang-fr
+    - freeswitch-lang-he
+    - freeswitch-lang-pt
+    - freeswitch-lang-ru
+    - freeswitch-lang-sv
+    - freeswitch-perl
+    - freeswitch-sounds-en-ca-june
+    - freeswitch-sounds-en-ca-june-16000
+    - freeswitch-sounds-en-ca-june-32000
+    - freeswitch-sounds-en-ca-june-48000
+    - freeswitch-sounds-en-ca-june-8000
+    - freeswitch-sounds-en-ca-june-all
+    - freeswitch-sounds-en-us-callie
+    - freeswitch-sounds-en-us-callie-16000
+    - freeswitch-sounds-en-us-callie-32000
+    - freeswitch-sounds-en-us-callie-48000
+    - freeswitch-sounds-en-us-callie-8000
+    - freeswitch-sounds-en-us-callie-all
+    - freeswitch-sounds-fr-ca-june
+    - freeswitch-sounds-fr-ca-june
+    - freeswitch-sounds-fr-ca-june
+    - freeswitch-sounds-fr-ca-june
+    - freeswitch-sounds-fr-ca-june
+    - freeswitch-sounds-fr-ca-june
+    - freeswitch-sounds-music
+    - freeswitch-sounds-music-16000
+    - freeswitch-sounds-music-32000
+    - freeswitch-sounds-music-48000
+    - freeswitch-sounds-music-8000
+    - freeswitch-sounds-ru-RU-elena
+    - freeswitch-sounds-ru-RU-elena-16000
+    - freeswitch-sounds-ru-RU-elena-32000
+    - freeswitch-sounds-ru-RU-elena-48000
+    - freeswitch-sounds-ru-RU-elena-8000
+    - freeswitch-sounds-ru-RU-elena-all
+
+#- template: src=kamailio.cfg.j2 dest=/etc/kamailio/kamailio.cfg
+
+- name: Clean config
+  shell: "rm -rf /etc/freeswitch/{{ item }}/*"
+  with_items:
+    - "dialplan"
+    - "chatplan"
+    - "directory"
+    - "sip_profiles"
+    - "skinny_profiles"
+    - "ivr_menus"
+
+- template: src=vars.xml.j2 dest=/etc/freeswitch/vars.xml owner=freeswitch group=daemon mode=0644
+- template: src=acl.conf.xml.j2 dest=/etc/freeswitch/autoload_configs/acl.conf.xml owner=freeswitch group=daemon mode=0644
+
+- file: path=/etc/freeswitch/sip_profiles/external state=directory owner=freeswitch group=daemon mode=0644
+
+- copy: src=default.xml dest=/etc/freeswitch/directory/default.xml owner=freeswitch group=daemon mode=0644
+- copy: src=external.xml dest=/etc/freeswitch/sip_profiles/external.xml owner=freeswitch group=daemon mode=0644
+- copy: src=gw_flowroute.xml dest=/etc/freeswitch/sip_profiles/external/gw_flowroute.xml owner=freeswitch group=daemon mode=0644
+- copy: src=modules.conf.xml dest=/etc/freeswitch/autoload_configs/modules.conf.xml owner=freeswitch group=daemon mode=0644
+- copy: src=event_socket.conf.xml dest=/etc/freeswitch/autoload_configs/event_socket.conf.xml owner=freeswitch group=daemon mode=0644
+- copy: src=switch.conf.xml dest=/etc/freeswitch/autoload_configs/switch.conf.xml owner=freeswitch group=daemon mode=0644
+- copy: src=public.xml dest=/etc/freeswitch/dialplan/public.xml owner=freeswitch group=daemon mode=0644
+
+- name: RingMail script
+  copy: src=ringmail.pl dest=/usr/share/freeswitch/scripts/ringmail.pl owner=freeswitch group=daemon mode=0755
+
+- service: name=freeswitch enabled=yes state=started

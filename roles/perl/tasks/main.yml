@@ -47,4 +47,11 @@
    - perl-Readonly-XS
    - perl-Image-Scale
    - perl-Crypt-CBC
+   - perl-Data-GUID
+   - perl-Number-Phone
+   - perl-Ref-Util
+   - perl-Template-Plugin-Page
+   - perl-HTML-Escape
+   - perl-Net-DNS
+   - GraphicsMagick-perl
 

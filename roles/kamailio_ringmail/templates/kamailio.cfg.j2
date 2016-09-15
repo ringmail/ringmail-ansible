@@ -129,6 +129,7 @@ import_file "kamailio-local.cfg"
 #!define FLB_NATSIPPING 7
 
 #!define FLB_IPV6 8
+#!define FLB_NO_PROXY 9
 
 ####### Global Parameters #########
 
@@ -233,6 +234,7 @@ loadmodule "utils.so"
 loadmodule "sdpops.so"
 loadmodule "cfgutils.so"
 loadmodule "async.so"
+loadmodule "avpops.so"
 
 #!ifdef WITH_AUTH
 loadmodule "auth.so"
@@ -682,6 +684,10 @@ route[WITHINDLG] {
 			# ACK is forwarded statelessy
 			route(NATMANAGE);
 		}
+		else if ( is_method("INVITE") ) {
+			# ACK is forwarded statelessy
+			xlog("L_INFO", "[R-WITHINDLG:$ci] Re-INVITE\n");
+		}
 		else if ( is_method("NOTIFY") ) {
 			# Add Record-Route for in-dialog NOTIFY as per RFC 6665.
 			record_route();
@@ -884,21 +890,28 @@ route[NATMANAGE] {
 	if(sdp_content()) {
 		#sdp_get("$avp(sdp)");
 		#xlog("L_INFO", "[R-NATMANAGE:$ci] SDP:\n$avp(sdp)\n");
-		if (search_body("^c=IN IP6"))
+		xlog("L_INFO", "[R-NATMANAGE:$ci] Update SDP\n");
+		#avp_print();
+		if ((! $avp(ringmail_no_proxy)) && (! isflagset(FLB_NO_PROXY)))
 		{
-			xlog("L_INFO", "[R-NATMANAGE:$ci] IPv6 SDP Detected Adding RTP Proxy\n");
-			rtpproxy_manage("co");
-		}
-		else if (isbflagset(FLB_IPV6))
-		{
-			xlog("L_INFO", "[R-NATMANAGE:$ci] IPv6 Destination: $ru");
-			rtpproxy_manage("co");
-		}
-		else
-		{
-			$avp(ice_priority) = 2;
-			xlog("L_INFO", "[R-NATMANAGE:$ci] Proxy Manage");
-			rtpproxy_manage();
+			if (search_body("^c=IN IP6"))
+			{
+				sdp_get("$avp(sdp)");
+				#xlog("L_INFO", "[R-NATMANAGE:$ci] SDP:\n$avp(sdp)\n");
+				xlog("L_INFO", "[R-NATMANAGE:$ci] IPv6 SDP Detected Adding RTP Proxy\n");
+				rtpproxy_manage("co");
+			}
+			else if (isbflagset(FLB_IPV6))
+			{
+				xlog("L_INFO", "[R-NATMANAGE:$ci] IPv6 Destination: $ru");
+				rtpproxy_manage("co");
+			}
+			else
+			{
+				$avp(ice_priority) = 2;
+				xlog("L_INFO", "[R-NATMANAGE:$ci] Proxy Manage");
+				rtpproxy_manage();
+			}
 		}
 	}
 #!endif
@@ -946,7 +959,7 @@ route[RINGMAIL] {
 	$var(rgfrom) = $(fu{s.encode.base64});
 	http_query("http://{{ kamailio_rg_host }}/internal/lookup?to=$(var(rgto){s.escape.param})&from=$(var(rgfrom){s.escape.param})", "$var(result)");
 	$var(rc) = $retcode;
-	xlog("L_INFO", "[R-RINGMAIL:$ci] Ringmail uri:$ru code:$var(rc) result:$var(result)\n");
+	xlog("L_INFO", "[R-RINGMAIL:$ci] Ringmail uri:$ru code:$var(rc) result:$var(result) net:$hdr(X-RingMail-Network)\n");
 	switch ($var(rc))
 	{
 		case -1:
@@ -970,14 +983,41 @@ route[RINGMAIL] {
 					$var(from) = $(var(result){param.value,from});
 					$var(uuid) = $(var(result){param.value,uuid});
 					$var(contact) = $(var(result){param.value,contact});
-					xlog("L_INFO", "[R-RINGMAIL:$ci] Lookup to:$var(to) from:$var(from) uuid:$var(uuid) contact:$var(contact)\n");
+					xlog("L_INFO", "[R-RINGMAIL:$ci] Lookup phone to:$var(to) from:$var(from) uuid:$var(uuid) contact:$var(contact)\n");
 					$ru = "sip:"+ $var(to)+ "@"+ "{{ kamailio_domain }}";
 					$fU = $var(from);
 					$avp(ringmail_to) = $var(to);
 					$avp(ringmail_from) = $var(from);
 					t_newtran();
-					t_set_fr(30000, 1000);
+					t_set_fr(60000, 1000);
 					return;
+				}
+				if ($var(type) == "did")
+				{
+					$var(to) = $(var(result){param.value,to});
+					$var(from) = $(var(result){param.value,from});
+					xlog("L_INFO", "[R-RINGMAIL:$ci] Lookup did to:$var(to) from:$var(from)\n");
+					$ru = "sip:"+ $var(to)+ "@"+ "{{ kamailio_domain }}:5080;transport=tcp";
+					#$fU = $var(from);
+					$avp(ringmail_no_proxy) = 1;
+					setbflag(FLB_NO_PROXY);
+					append_hf("X-RingMail-Type: did\r\n");
+					append_hf("X-RingMail-From: $var(from)\r\n");
+					route(RELAY);
+				}
+				if ($var(type) == "sip")
+				{
+					$var(to) = $(var(result){param.value,to});
+					$var(from) = $(var(result){param.value,from});
+					xlog("L_INFO", "[R-RINGMAIL:$ci] Lookup sip to:$var(to) from:$var(from) uuid:$var(uuid) contact:$var(contact)\n");
+					$ru = "sip:gateway@{{ kamailio_domain }}:5080;transport=tcp";
+					#$fU = $var(from);
+					$avp(ringmail_no_proxy) = 1;
+					setbflag(FLB_NO_PROXY);
+					append_hf("X-RingMail-Type: sip\r\n");
+					append_hf("X-RingMail-Route: $var(to)\r\n");
+					append_hf("X-RingMail-From: $var(from)\r\n");
+					route(RELAY);
 				}
 				if ($var(type) == "url")
 				{

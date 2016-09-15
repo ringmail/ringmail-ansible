@@ -1,0 +1,10 @@
+---
+- name: install rpms
+  yum: name={{ item }} state=present
+  with_items:
+   - rtpproxy
+
+- template: src=rtpproxy.j2 dest=/etc/sysconfig/rtpproxy
+
+#- systemd: name=rtpproxy state=restarted daemon_reload=yes enabled=yes
+
