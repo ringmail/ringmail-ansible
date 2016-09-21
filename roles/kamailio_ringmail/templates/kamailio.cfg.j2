@@ -162,6 +162,7 @@ alias="{{ kamailio_domain }}"
 
 /* uncomment and configure the following line if you want Kamailio to 
    bind on a specific interface/port/proto (default bind on all available) */
+listen=udp:0.0.0.0:5060 advertise {{ ansible_ec2_public_ipv4 | default(ansible_default_ipv4['address']) }}:5060
 listen=tcp:0.0.0.0:5060 advertise {{ ansible_ec2_public_ipv4 | default(ansible_default_ipv4['address']) }}:5060
 listen=tls:0.0.0.0:5061 advertise {{ ansible_ec2_public_ipv4 | default(ansible_default_ipv4['address']) }}:5061
 
@@ -997,7 +998,7 @@ route[RINGMAIL] {
 					$var(to) = $(var(result){param.value,to});
 					$var(from) = $(var(result){param.value,from});
 					xlog("L_INFO", "[R-RINGMAIL:$ci] Lookup did to:$var(to) from:$var(from)\n");
-					$ru = "sip:"+ $var(to)+ "@"+ "{{ kamailio_domain }}:5080;transport=tcp";
+					$ru = "sip:"+ $var(to)+ "@"+ "{{ kamailio_domain }}:5080";
 					#$fU = $var(from);
 					$avp(ringmail_no_proxy) = 1;
 					setbflag(FLB_NO_PROXY);
@@ -1010,7 +1011,7 @@ route[RINGMAIL] {
 					$var(to) = $(var(result){param.value,to});
 					$var(from) = $(var(result){param.value,from});
 					xlog("L_INFO", "[R-RINGMAIL:$ci] Lookup sip to:$var(to) from:$var(from) uuid:$var(uuid) contact:$var(contact)\n");
-					$ru = "sip:gateway@{{ kamailio_domain }}:5080;transport=tcp";
+					$ru = "sip:gateway@{{ kamailio_domain }}:5080";
 					#$fU = $var(from);
 					$avp(ringmail_no_proxy) = 1;
 					setbflag(FLB_NO_PROXY);

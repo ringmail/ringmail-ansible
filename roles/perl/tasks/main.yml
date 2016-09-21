@@ -54,4 +54,6 @@
    - perl-HTML-Escape
    - perl-Net-DNS
    - GraphicsMagick-perl
+   - perl-WWW-Mechanize
+   - perl-WWW-Mechanize-TreeBuilder
 

@@ -1,6 +1,6 @@
 ---
 - name: install rpms
-  yum: name=ejabberd-16.04-10.el7.centos state=present
+  yum: name=ejabberd-16.04-11.el7.centos state=present
 
 - name: template ejabberd.yml
   template: src=ejabberd.yml.j2 dest=/etc/ejabberd/ejabberd.yml
