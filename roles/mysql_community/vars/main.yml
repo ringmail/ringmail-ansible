@@ -1,0 +1,6 @@
+# file: roles/mysql/defaults/main.yml
+
+expire_logs_days: 30
+long_query_time: 10
+mysql_root_password: 'HZqPO5BW'
+

@@ -1,0 +1,69 @@
+# {{ ansible_managed }}
+
+[mysqld]
+sql_mode=NO_ENGINE_SUBSTITUTION
+character-set-server=utf8
+datadir=/var/lib/mysql 
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+
+{% if mysql_binlog_enable is defined and mysql_binlog_enable %}
+# enable bin log
+log-bin=mysqld-bin
+expire_logs_days={{ expire_logs_days }}
+binlog-format=ROW
+log-bin-trust-function-creators=1
+{% else %}
+# no binlog
+{% endif %}
+  
+# enable slow query log
+{% if mysql_log_table is defined and mysql_log_table %}
+log_output = TABLE
+{% else %}
+slow-query-log-file=/var/log/mysql-slow.log
+{% endif %}
+slow-query-log=1
+long_query_time={{ long_query_time }}
+  
+# This duplicated config is needed for /etc/init.d/mysql provided by Oracle.
+pid-file=/var/run/mysqld/mysqld.pid
+
+{% if mysql_production is defined and mysql_production %}
+max_connections=1000
+max_allowed_packet=32M
+innodb_buffer_pool_size = 50G
+innodb_flush_method = O_DIRECT
+innodb_flush_log_at_trx_commit = 2
+innodb_flush_neighbors = 0
+innodb_log_file_size=2G
+{% else %}
+innodb_use_sys_malloc = 0
+innodb_buffer_pool_size = 64M
+{% endif %}
+
+{% if mysql_replication is defined and mysql_replication %}
+{% if mysql_production is defined and mysql_production %}
+# Production replication
+{% else %}
+# Staging replication
+auto-increment-offset={{ mysql_replication_offset }}
+auto-increment-increment={{ mysql_replication_increment }}
+binlog-ignore-db=mysql
+binlog-ignore-db=syslog
+binlog-ignore-db=freeswitch
+replicate-ignore-db=mysql
+replicate-ignore-db=syslog
+replicate-ignore-db=freeswitch
+{% endif %}
+server-id={{ mysql_replication_id }}
+{% endif %}
+  
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+
+[mysql]
+default-character-set=utf8
