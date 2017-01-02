@@ -12,6 +12,7 @@
    - perl-Archive-Zip
    - perl-libwww-perl
    - perl-Plack
+   - perl-FCGI
    - perl-FCGI-ProcManager
    - perl-Moose
    - perl-Devel-StackTrace-2.00-1.el7.centos
@@ -56,4 +57,12 @@
    - GraphicsMagick-perl
    - perl-WWW-Mechanize
    - perl-WWW-Mechanize-TreeBuilder
+   - perl-Math-Round
+   - perl-Geography-States
+   - perl-Business-PayPal-API
+   - perl-Business-CCCheck
+   - perl-Business-OnlinePayment
+   - perl-Throwable
+   - perl-Data-Faker
+   - perl-Net-APNS-Persistent
 

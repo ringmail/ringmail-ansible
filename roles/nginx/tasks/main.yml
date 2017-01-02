@@ -1,2 +1,5 @@
 ---
 - include: install.yml
+
+- template: src=note.conf.j2 dest=/etc/nginx/conf.d/note.conf
+

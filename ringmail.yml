@@ -1,13 +1,14 @@
 - name: WWW Hosts
   hosts: www_hosts
-  user: centos
-  become: yes
-  become_user: root
+  user: root
+#  user: centos
+#  become: yes
+#  become_user: root
   gather_facts: yes
-  vars:
-    ec2_gather: 1
+#  vars:
+#    ec2_gather: 1
   roles:
-    - role: ec2_gather
+#    - role: ec2_gather
     - role: ntp
     - role: utils
     - role: nginx
